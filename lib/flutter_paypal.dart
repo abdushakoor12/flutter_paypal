@@ -11,11 +11,25 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'src/PaypalServices.dart';
 import 'src/errors/network_error.dart';
 
+enum PaymentMethod { paypal, creditCard }
+
+extension PaymentMethodExtensions on PaymentMethod {
+  String get name {
+    switch (this) {
+      case PaymentMethod.paypal:
+        return 'paypal';
+      case PaymentMethod.creditCard:
+        return 'credit_card';
+    }
+  }
+}
+
 class UsePaypal extends StatefulWidget {
   final Function onSuccess, onCancel, onError;
   final String returnURL, cancelURL, note, clientId, secretKey;
   final List transactions;
   final bool sandboxMode;
+  final PaymentMethod paymentMethod;
   const UsePaypal({
     Key? key,
     required this.onSuccess,
@@ -26,6 +40,7 @@ class UsePaypal extends StatefulWidget {
     required this.transactions,
     required this.clientId,
     required this.secretKey,
+    this.paymentMethod = PaymentMethod.paypal,
     this.sandboxMode = false,
     this.note = '',
   }) : super(key: key);
@@ -52,7 +67,9 @@ class UsePaypalState extends State<UsePaypal> {
   Map getOrderParams() {
     Map<String, dynamic> temp = {
       "intent": "sale",
-      "payer": {"payment_method": "paypal"},
+      "payer": {
+        "payment_method": widget.paymentMethod.name,
+      },
       "transactions": widget.transactions,
       "note_to_payer": widget.note,
       "redirect_urls": {
@@ -239,9 +256,9 @@ class UsePaypalState extends State<UsePaypal> {
                                   (WebViewController webViewController) {
                                 _controller.complete(webViewController);
                               },
-                              javascriptChannels: <JavascriptChannel>[
+                              javascriptChannels: <JavascriptChannel>{
                                 _toasterJavascriptChannel(context),
-                              ].toSet(),
+                              },
                               navigationDelegate:
                                   (NavigationRequest request) async {
                                 if (request.url
