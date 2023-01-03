@@ -14,7 +14,7 @@ import 'src/errors/network_error.dart';
 enum PaymentMethod { paypal, creditCard }
 
 extension PaymentMethodExtensions on PaymentMethod {
-  String get name {
+  String get label {
     switch (this) {
       case PaymentMethod.paypal:
         return 'paypal';
@@ -68,7 +68,7 @@ class UsePaypalState extends State<UsePaypal> {
     Map<String, dynamic> temp = {
       "intent": "sale",
       "payer": {
-        "payment_method": widget.paymentMethod.name,
+        "payment_method": widget.paymentMethod.label,
       },
       "transactions": widget.transactions,
       "note_to_payer": widget.note,
